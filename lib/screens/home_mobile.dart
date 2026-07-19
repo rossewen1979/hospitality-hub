@@ -1,14 +1,55 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import '../widgets/dashboard_card.dart';
+import '../widgets/revenue_input_card.dart';
 
-class HomeMobile extends StatelessWidget {
+class HomeMobile extends StatefulWidget {
   const HomeMobile({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF163A70);
+  State<HomeMobile> createState() => _HomeMobileState();
+}
 
+class _HomeMobileState extends State<HomeMobile> {
+  static const primaryColor = Color(0xFF163A70);
+
+  final TextEditingController wetRevenueController =
+      TextEditingController();
+
+  final TextEditingController foodRevenueController =
+      TextEditingController();
+
+  final TextEditingController otherRevenueController =
+      TextEditingController();
+
+  final TextEditingController labourCostController =
+      TextEditingController();
+
+  bool completed = false;
+
+  @override
+  void dispose() {
+    wetRevenueController.dispose();
+    foodRevenueController.dispose();
+    otherRevenueController.dispose();
+    labourCostController.dispose();
+    super.dispose();
+  }
+
+  void saveTradingDay() {
+    setState(() {
+      completed = true;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Trading figures saved successfully."),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
       child: Column(
@@ -16,11 +57,13 @@ class HomeMobile extends StatelessWidget {
         children: [
           LayoutBuilder(
             builder: (context, constraints) {
-              final logoWidth =
-                  math.min(constraints.maxWidth, 720.0);
+              final logoWidth = math.min(
+                constraints.maxWidth,
+                720.0,
+              );
 
               return Image.asset(
-                'assets/images/logo.png',
+                "assets/images/logo.png",
                 width: logoWidth,
                 fit: BoxFit.contain,
               );
@@ -30,12 +73,15 @@ class HomeMobile extends StatelessWidget {
           const SizedBox(height: 8),
 
           ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 460),
+            constraints: const BoxConstraints(
+              maxWidth: 460,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment:
+                  CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'The Corner House',
+                  "The Corner House",
                   style: TextStyle(
                     fontSize: 26,
                     fontWeight: FontWeight.w700,
@@ -46,7 +92,7 @@ class HomeMobile extends StatelessWidget {
                 const SizedBox(height: 2),
 
                 const Text(
-                  'Good Morning, Ross',
+                  "Good Morning, Ross",
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.black54,
@@ -56,7 +102,7 @@ class HomeMobile extends StatelessWidget {
                 const SizedBox(height: 3),
 
                 const Text(
-                  'Monday 20 July',
+                  "Monday 20 July",
                   style: TextStyle(
                     fontSize: 15,
                     color: Colors.grey,
@@ -67,67 +113,116 @@ class HomeMobile extends StatelessWidget {
 
                 DashboardCard(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
                       const Text(
                         "Yesterday's Trading",
                         style: TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                          fontWeight:
+                              FontWeight.bold,
                         ),
                       ),
 
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 8),
 
                       const Text(
-                        "Complete yesterday's figures to unlock today's insights.",
+                        "Enter yesterday's figures below.",
                         style: TextStyle(
                           fontSize: 15,
                           color: Colors.black54,
                         ),
                       ),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 24),
 
-                      const Row(
+                      RevenueInputCard(
+                        title: "Wet Revenue",
+                        controller:
+                            wetRevenueController,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      RevenueInputCard(
+                        title: "Food Revenue",
+                        controller:
+                            foodRevenueController,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      RevenueInputCard(
+                        title: "Other Revenue",
+                        controller:
+                            otherRevenueController,
+                      ),
+
+                      const SizedBox(height: 16),
+
+                      RevenueInputCard(
+                        title: "Labour Cost",
+                        controller:
+                            labourCostController,
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      Row(
                         children: [
                           Icon(
-                            Icons.warning_amber_rounded,
-                            color: Colors.orange,
+                            completed
+                                ? Icons.check_circle
+                                : Icons.warning_amber_rounded,
+                            color: completed
+                                ? Colors.green
+                                : Colors.orange,
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
-                            "Not Completed",
-                            style: TextStyle(
+                            completed
+                                ? "Completed"
+                                : "Not Completed",
+                            style: const TextStyle(
                               fontSize: 18,
-                              fontWeight: FontWeight.w600,
+                              fontWeight:
+                                  FontWeight.w600,
                             ),
                           ),
                         ],
                       ),
 
-                      const SizedBox(height: 22),
+                      const SizedBox(height: 24),
 
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
+                          style:
+                              ElevatedButton.styleFrom(
+                            backgroundColor:
+                                primaryColor,
+                            foregroundColor:
+                                Colors.white,
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(
+                            padding:
+                                const EdgeInsets.symmetric(
                               vertical: 18,
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(14),
+                            shape:
+                                RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius
+                                      .circular(14),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: saveTradingDay,
                           child: const Text(
-                            "Complete Trading Day",
+                            "Save Trading Day",
                             style: TextStyle(
                               fontSize: 16,
-                              fontWeight: FontWeight.bold,
+                              fontWeight:
+                                  FontWeight.bold,
                             ),
                           ),
                         ),
