@@ -5,7 +5,7 @@ import '../models/trading_day.dart';
 import '../services/storage_service.dart';
 import '../widgets/dashboard_card.dart';
 import '../widgets/revenue_input_card.dart';
-
+import '../widgets/snapshot_card.dart';
 class HomeDesktop extends StatefulWidget {
   const HomeDesktop({super.key});
 
