@@ -20,6 +20,7 @@ class HomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final today = DateTime.now();
+    final metrics = controller.metrics;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
@@ -42,10 +43,10 @@ class HomeDashboard extends StatelessWidget {
             children: [
               Expanded(
                 child: SnapshotCard(
-                  wetRevenue: controller.wetRevenue,
-                  foodRevenue: controller.foodRevenue,
-                  otherRevenue: controller.otherRevenue,
-                  labourCost: controller.labourCost,
+                  wetRevenue: metrics.wetRevenue,
+                  foodRevenue: metrics.foodRevenue,
+                  otherRevenue: metrics.otherRevenue,
+                  labourCost: metrics.labourCost,
                 ),
               ),
 
