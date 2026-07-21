@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/trading_day.dart';
+import '../services/hospitality_day_service.dart';
+import '../services/hospitality_metrics.dart';
 import '../services/storage_service.dart';
 
 class TradingDayController extends ChangeNotifier {
@@ -12,23 +14,34 @@ class TradingDayController extends ChangeNotifier {
   bool loading = true;
   bool completed = false;
 
-  double get wetRevenue => _parse(wetRevenueController);
+  TradingDayController() {
+    wetRevenueController.addListener(_onChanged);
+    foodRevenueController.addListener(_onChanged);
+    otherRevenueController.addListener(_onChanged);
+    labourCostController.addListener(_onChanged);
+  }
 
-  double get foodRevenue => _parse(foodRevenueController);
+  double _parse(TextEditingController controller) {
+    return double.tryParse(
+          controller.text.replaceAll(',', ''),
+        ) ??
+        0;
+  }
 
-  double get otherRevenue => _parse(otherRevenueController);
-
-  double get labourCost => _parse(labourCostController);
-
-  double get totalRevenue =>
-      wetRevenue + foodRevenue + otherRevenue;
-
-  double get labourPercent =>
-      totalRevenue == 0 ? 0 : (labourCost / totalRevenue) * 100;
+  HospitalityMetrics get metrics => HospitalityMetrics(
+        wetRevenue: _parse(wetRevenueController),
+        foodRevenue: _parse(foodRevenueController),
+        otherRevenue: _parse(otherRevenueController),
+        labourCost: _parse(labourCostController),
+      );
 
   Future<void> load() async {
-    final tradingDay =
-        await StorageService.loadTradingDay();
+    loading = true;
+    notifyListeners();
+
+    final tradingDay = await StorageService.loadTradingDay(
+      HospitalityDayService.tradingDayId(),
+    );
 
     if (tradingDay != null) {
       wetRevenueController.text =
@@ -44,6 +57,12 @@ class TradingDayController extends ChangeNotifier {
           tradingDay.labourCost.toStringAsFixed(2);
 
       completed = tradingDay.completed;
+    } else {
+      wetRevenueController.clear();
+      foodRevenueController.clear();
+      otherRevenueController.clear();
+      labourCostController.clear();
+      completed = false;
     }
 
     loading = false;
@@ -51,37 +70,42 @@ class TradingDayController extends ChangeNotifier {
   }
 
   Future<void> save() async {
+    final tradingDate =
+        HospitalityDayService.currentTradingDate();
+
     final tradingDay = TradingDay(
-      wetRevenue: wetRevenue,
-      foodRevenue: foodRevenue,
-      otherRevenue: otherRevenue,
-      labourCost: labourCost,
+      id: HospitalityDayService.tradingDayId(),
+      tradingDate: tradingDate,
+      savedAt: DateTime.now(),
+      wetRevenue: metrics.wetRevenue,
+      foodRevenue: metrics.foodRevenue,
+      otherRevenue: metrics.otherRevenue,
+      labourCost: metrics.labourCost,
       completed: true,
-      date: DateTime.now(),
     );
 
-    await StorageService.saveTradingDay(
-      tradingDay,
-    );
+    await StorageService.saveTradingDay(tradingDay);
 
     completed = true;
-
     notifyListeners();
   }
 
-  double _parse(TextEditingController controller) {
-    return double.tryParse(
-          controller.text.replaceAll(',', ''),
-        ) ??
-        0;
+  void _onChanged() {
+    notifyListeners();
   }
 
   @override
   void dispose() {
+    wetRevenueController.removeListener(_onChanged);
+    foodRevenueController.removeListener(_onChanged);
+    otherRevenueController.removeListener(_onChanged);
+    labourCostController.removeListener(_onChanged);
+
     wetRevenueController.dispose();
     foodRevenueController.dispose();
     otherRevenueController.dispose();
     labourCostController.dispose();
+
     super.dispose();
   }
 }

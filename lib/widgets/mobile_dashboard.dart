@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/trading_day_controller.dart';
-import 'dashboard_card.dart';
-import 'revenue_input_card.dart';
+import 'header_card.dart';
 import 'save_status_bar.dart';
+import 'snapshot_card.dart';
+import 'trading_entry_card.dart';
+import 'weather_card.dart';
 
 class MobileDashboard extends StatelessWidget {
   final TradingDayController controller;
@@ -17,69 +19,49 @@ class MobileDashboard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final today = DateTime.now();
+    final metrics = controller.metrics;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 460),
-          child: DashboardCard(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Yesterday's Trading",
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              HeaderCard(
+                venueName: 'The Corner House',
+                greeting: 'Good Morning, Ross',
+                date: today,
+              ),
 
-                const SizedBox(height: 8),
+              const SizedBox(height: 24),
 
-                const Text(
-                  "Enter yesterday's figures below.",
-                  style: TextStyle(
-                    fontSize: 15,
-                    color: Colors.black54,
-                  ),
-                ),
+              SnapshotCard(
+                metrics: metrics,
+              ),
 
-                const SizedBox(height: 24),
+              const SizedBox(height: 20),
 
-                RevenueInputCard(
-                  title: "Wet Revenue",
-                  controller: controller.wetRevenueController,
-                ),
+              const WeatherCard(),
 
-                const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
-                RevenueInputCard(
-                  title: "Food Revenue",
-                  controller: controller.foodRevenueController,
-                ),
+              TradingEntryCard(
+                wetRevenueController: controller.wetRevenueController,
+                foodRevenueController: controller.foodRevenueController,
+                otherRevenueController: controller.otherRevenueController,
+                labourCostController: controller.labourCostController,
+              ),
 
-                const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
-                RevenueInputCard(
-                  title: "Other Revenue",
-                  controller: controller.otherRevenueController,
-                ),
-
-                const SizedBox(height: 16),
-
-                RevenueInputCard(
-                  title: "Labour Cost",
-                  controller: controller.labourCostController,
-                ),
-
-                const SizedBox(height: 24),
-
-                SaveStatusBar(
-                  completed: controller.completed,
-                  onSave: onSave,
-                ),
-              ],
-            ),
+              SaveStatusBar(
+                completed: controller.completed,
+                onSave: onSave,
+              ),
+            ],
           ),
         ),
       ),

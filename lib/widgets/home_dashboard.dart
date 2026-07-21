@@ -43,10 +43,7 @@ class HomeDashboard extends StatelessWidget {
             children: [
               Expanded(
                 child: SnapshotCard(
-                  wetRevenue: metrics.wetRevenue,
-                  foodRevenue: metrics.foodRevenue,
-                  otherRevenue: metrics.otherRevenue,
-                  labourCost: metrics.labourCost,
+                  metrics: metrics,
                 ),
               ),
 
@@ -61,14 +58,10 @@ class HomeDashboard extends StatelessWidget {
           const SizedBox(height: 24),
 
           TradingEntryCard(
-            wetRevenueController:
-                controller.wetRevenueController,
-            foodRevenueController:
-                controller.foodRevenueController,
-            otherRevenueController:
-                controller.otherRevenueController,
-            labourCostController:
-                controller.labourCostController,
+            wetRevenueController: controller.wetRevenueController,
+            foodRevenueController: controller.foodRevenueController,
+            otherRevenueController: controller.otherRevenueController,
+            labourCostController: controller.labourCostController,
           ),
 
           const SizedBox(height: 30),
