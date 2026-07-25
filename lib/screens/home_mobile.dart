@@ -13,6 +13,8 @@ class HomeMobile extends StatefulWidget {
 class _HomeMobileState extends State<HomeMobile> {
   late final TradingDayController controller;
 
+  int _dashboardRefreshKey = 0;
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +28,7 @@ class _HomeMobileState extends State<HomeMobile> {
 
   void _controllerChanged() {
     if (!mounted) return;
+
     setState(() {});
   }
 
@@ -33,6 +36,10 @@ class _HomeMobileState extends State<HomeMobile> {
     await controller.save();
 
     if (!mounted) return;
+
+    setState(() {
+      _dashboardRefreshKey++;
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -59,6 +66,7 @@ class _HomeMobileState extends State<HomeMobile> {
     }
 
     return MobileDashboard(
+      key: ValueKey(_dashboardRefreshKey),
       controller: controller,
       onSave: _saveTradingDay,
     );

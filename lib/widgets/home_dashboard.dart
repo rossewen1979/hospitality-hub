@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../controllers/trading_day_controller.dart';
+import '../services/hospitality_metrics.dart';
+import '../services/weekly_metrics_service.dart';
 import 'header_card.dart';
 import 'save_status_bar.dart';
 import 'snapshot_card.dart';
@@ -20,7 +22,6 @@ class HomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final today = DateTime.now();
-    final metrics = controller.metrics;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(
@@ -42,14 +43,26 @@ class HomeDashboard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: SnapshotCard(
-                  metrics: metrics,
+                child: FutureBuilder<HospitalityMetrics>(
+                  future: WeeklyMetricsService.currentWeekMetrics(),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    return SnapshotCard(
+                      metrics: snapshot.data!,
+                    );
+                  },
                 ),
               ),
 
               const SizedBox(width: 24),
 
-              const Expanded(
+              const SizedBox(
+                width: 360,
                 child: WeatherCard(),
               ),
             ],

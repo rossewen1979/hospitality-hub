@@ -13,6 +13,8 @@ class HomeDesktop extends StatefulWidget {
 class _HomeDesktopState extends State<HomeDesktop> {
   late final TradingDayController controller;
 
+  int _dashboardRefreshKey = 0;
+
   @override
   void initState() {
     super.initState();
@@ -26,6 +28,7 @@ class _HomeDesktopState extends State<HomeDesktop> {
 
   void _controllerChanged() {
     if (!mounted) return;
+
     setState(() {});
   }
 
@@ -33,6 +36,10 @@ class _HomeDesktopState extends State<HomeDesktop> {
     await controller.save();
 
     if (!mounted) return;
+
+    setState(() {
+      _dashboardRefreshKey++;
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -59,6 +66,7 @@ class _HomeDesktopState extends State<HomeDesktop> {
     }
 
     return HomeDashboard(
+      key: ValueKey(_dashboardRefreshKey),
       controller: controller,
       onSave: _saveTradingDay,
     );
