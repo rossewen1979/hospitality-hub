@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../features/compliance/widgets/compliance_dashboard.dart';
 import '../services/hospitality_metrics.dart';
 import 'dashboard_card.dart';
 import 'kpi_tile.dart';
@@ -19,13 +20,15 @@ class SnapshotCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "This Week",
+            'This Week',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
+
           const SizedBox(height: 24),
+
           Row(
             children: [
               KpiTile(
@@ -54,6 +57,8 @@ class SnapshotCard extends StatelessWidget {
               ),
             ],
           ),
+
+          const ComplianceDashboard(),
         ],
       ),
     );
