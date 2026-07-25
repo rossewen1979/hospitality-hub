@@ -1,3 +1,4 @@
+import '../models/revenue_breakdown.dart';
 import '../models/trading_day.dart';
 import 'hospitality_day_service.dart';
 import 'hospitality_metrics.dart';
@@ -5,12 +6,11 @@ import 'storage_service.dart';
 
 class WeeklyMetricsService {
   static Future<HospitalityMetrics> currentWeekMetrics() async {
-    final allTradingDays =
-        await StorageService.loadAllTradingDays();
+    final allTradingDays = await StorageService.loadAllTradingDays();
 
     final thisWeek = allTradingDays.where(
-      (TradingDay day) => HospitalityDayService
-          .isInCurrentTradingWeek(day.tradingDate),
+      (TradingDay day) =>
+          HospitalityDayService.isInCurrentTradingWeek(day.tradingDate),
     );
 
     double wetRevenue = 0;
@@ -31,5 +31,63 @@ class WeeklyMetricsService {
       otherRevenue: otherRevenue,
       labourCost: labourCost,
     );
+  }
+
+  static Future<RevenueBreakdown> revenueBreakdown() async {
+    final metrics = await currentWeekMetrics();
+
+    return RevenueBreakdown(
+      wetRevenue: metrics.wetRevenue,
+      foodRevenue: metrics.foodRevenue,
+      otherRevenue: metrics.otherRevenue,
+    );
+  }
+
+  static Future<int> tradingDaysEnteredThisWeek() async {
+    final allTradingDays = await StorageService.loadAllTradingDays();
+
+    return allTradingDays.where(
+      (TradingDay day) =>
+          HospitalityDayService.isInCurrentTradingWeek(day.tradingDate),
+    ).length;
+  }
+
+  static Future<double> averageRevenueThisWeek() async {
+    final metrics = await currentWeekMetrics();
+    final days = await tradingDaysEnteredThisWeek();
+
+    if (days == 0) return 0;
+
+    return metrics.totalRevenue / days;
+  }
+
+  static Future<double> highestRevenueThisWeek() async {
+    final allTradingDays = await StorageService.loadAllTradingDays();
+
+    final thisWeek = allTradingDays.where(
+      (TradingDay day) =>
+          HospitalityDayService.isInCurrentTradingWeek(day.tradingDate),
+    );
+
+    if (thisWeek.isEmpty) return 0;
+
+    return thisWeek
+        .map((d) => d.totalRevenue)
+        .reduce((a, b) => a > b ? a : b);
+  }
+
+  static Future<double> lowestRevenueThisWeek() async {
+    final allTradingDays = await StorageService.loadAllTradingDays();
+
+    final thisWeek = allTradingDays.where(
+      (TradingDay day) =>
+          HospitalityDayService.isInCurrentTradingWeek(day.tradingDate),
+    );
+
+    if (thisWeek.isEmpty) return 0;
+
+    return thisWeek
+        .map((d) => d.totalRevenue)
+        .reduce((a, b) => a < b ? a : b);
   }
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/app_page.dart';
 import '../widgets/trading/trading_snapshot.dart';
+import '../widgets/trading/weekly_summary_card.dart';
 
 class TradingScreen extends StatelessWidget {
   const TradingScreen({super.key});
@@ -21,20 +22,18 @@ class TradingScreen extends StatelessWidget {
 
             const SizedBox(height: 24),
 
-            Row(
-              children: const [
+            const Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Expanded(
-                  child: _PlaceholderCard(
-                    title: 'This Week',
-                    subtitle: 'Weekly performance will appear here.',
-                  ),
+                  child: WeeklySummaryCard(),
                 ),
                 SizedBox(width: 20),
                 Expanded(
                   child: _PlaceholderCard(
                     title: 'Revenue Breakdown',
                     subtitle:
-                        'Food / Wet / Other charts will appear here.',
+                        'Live charts showing Wet, Food and Other sales.',
                   ),
                 ),
               ],
@@ -43,9 +42,9 @@ class TradingScreen extends StatelessWidget {
             const SizedBox(height: 20),
 
             const _PlaceholderCard(
-              title: 'Performance Trends',
+              title: 'Revenue Trends',
               subtitle:
-                  'Revenue, Labour %, GP and comparisons will appear here.',
+                  'Daily and weekly revenue trends will appear here.',
               height: 320,
             ),
           ],
@@ -63,7 +62,7 @@ class _PlaceholderCard extends StatelessWidget {
   const _PlaceholderCard({
     required this.title,
     required this.subtitle,
-    this.height = 170,
+    this.height = 180,
   });
 
   @override
@@ -99,8 +98,8 @@ class _PlaceholderCard extends StatelessWidget {
           Text(
             subtitle,
             style: const TextStyle(
-              color: Colors.black54,
               fontSize: 16,
+              color: Colors.black54,
             ),
           ),
         ],
