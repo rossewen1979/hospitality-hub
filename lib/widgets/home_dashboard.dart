@@ -22,10 +22,14 @@ class HomeDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final today = DateTime.now();
+    final width = MediaQuery.of(context).size.width;
+
+    final isMobile = width < 700;
+    final isTablet = width >= 700 && width < 1100;
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 40,
+      padding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 16 : 40,
         vertical: 20,
       ),
       child: Column(
@@ -39,11 +43,10 @@ class HomeDashboard extends StatelessWidget {
 
           const SizedBox(height: 35),
 
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: FutureBuilder<HospitalityMetrics>(
+          if (isMobile)
+            Column(
+              children: [
+                FutureBuilder<HospitalityMetrics>(
                   future: WeeklyMetricsService.currentWeekMetrics(),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
@@ -57,16 +60,41 @@ class HomeDashboard extends StatelessWidget {
                     );
                   },
                 ),
-              ),
 
-              const SizedBox(width: 24),
+                const SizedBox(height: 20),
 
-              const SizedBox(
-                width: 360,
-                child: WeatherCard(),
-              ),
-            ],
-          ),
+                const WeatherCard(),
+              ],
+            )
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: FutureBuilder<HospitalityMetrics>(
+                    future: WeeklyMetricsService.currentWeekMetrics(),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
+                      }
+
+                      return SnapshotCard(
+                        metrics: snapshot.data!,
+                      );
+                    },
+                  ),
+                ),
+
+                SizedBox(width: isTablet ? 20 : 24),
+
+                SizedBox(
+                  width: isTablet ? 300 : 360,
+                  child: const WeatherCard(),
+                ),
+              ],
+            ),
 
           const SizedBox(height: 24),
 
