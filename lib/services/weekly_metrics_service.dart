@@ -1,4 +1,5 @@
 import '../models/revenue_breakdown.dart';
+import '../models/trading_comparison.dart';
 import '../models/trading_day.dart';
 import 'hospitality_day_service.dart';
 import 'hospitality_metrics.dart';
@@ -89,5 +90,44 @@ class WeeklyMetricsService {
     return thisWeek
         .map((d) => d.totalRevenue)
         .reduce((a, b) => a < b ? a : b);
+  }
+
+  /// Returns today's trading day together with the
+  /// equivalent trading day last week and last year.
+  ///
+  /// Last year uses 364 days to keep the weekday aligned,
+  /// which is more useful for hospitality reporting.
+  static Future<TradingComparison> tradingComparison() async {
+    final tradingDays = await StorageService.loadAllTradingDays();
+
+    final today =
+        HospitalityDayService.currentTradingDate();
+
+    final lastWeek = today.subtract(
+      const Duration(days: 7),
+    );
+
+    final lastYear = today.subtract(
+      const Duration(days: 364),
+    );
+
+    TradingDay? find(DateTime date) {
+      try {
+        return tradingDays.firstWhere(
+          (day) =>
+              day.tradingDate.year == date.year &&
+              day.tradingDate.month == date.month &&
+              day.tradingDate.day == date.day,
+        );
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return TradingComparison(
+      today: find(today),
+      lastWeek: find(lastWeek),
+      lastYear: find(lastYear),
+    );
   }
 }

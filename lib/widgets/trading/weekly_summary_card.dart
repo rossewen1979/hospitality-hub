@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/hospitality_metrics.dart';
+import '../../models/trading_comparison.dart';
 import '../../services/weekly_metrics_service.dart';
 
 class WeeklySummaryCard extends StatelessWidget {
@@ -8,51 +8,22 @@ class WeeklySummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Future.wait([
-        WeeklyMetricsService.currentWeekMetrics(),
-        WeeklyMetricsService.tradingDaysEnteredThisWeek(),
-        WeeklyMetricsService.averageRevenueThisWeek(),
-      ]),
+    return FutureBuilder<TradingComparison>(
+      future: WeeklyMetricsService.tradingComparison(),
       builder: (context, snapshot) {
         if (!snapshot.hasData) {
           return const SizedBox(
-            height: 230,
+            height: 320,
             child: Center(
               child: CircularProgressIndicator(),
             ),
           );
         }
 
-        final metrics = snapshot.data![0] as HospitalityMetrics;
-        final days = snapshot.data![1] as int;
-        final average = snapshot.data![2] as double;
-
-        Widget stat(String title, String value) {
-          return Expanded(
-            child: Column(
-              children: [
-                Text(
-                  value,
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  title,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    color: Colors.black54,
-                  ),
-                ),
-              ],
-            ),
-          );
-        }
+        final comparison = snapshot.data!;
 
         return Container(
+          height: 320,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -72,43 +43,66 @@ class WeeklySummaryCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'This Week',
+                'Today\'s Trading',
                 style: TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
                 ),
               ),
+
               const SizedBox(height: 24),
-              Row(
-                children: [
-                  stat(
-                    'Revenue',
-                    '£${metrics.totalRevenue.toStringAsFixed(0)}',
-                  ),
-                  stat(
-                    'Labour',
-                    '${metrics.labourPercent.toStringAsFixed(1)}%',
-                  ),
-                  stat(
-                    'Average',
-                    '£${average.toStringAsFixed(0)}',
-                  ),
-                ],
+
+              _valueRow(
+                'Today',
+                comparison.todayRevenue,
+                Colors.black,
               ),
-              const SizedBox(height: 28),
+
+              const Divider(height: 28),
+
+              _comparisonRow(
+                title: 'Last Week',
+                revenue: comparison.lastWeekRevenue,
+                variance: comparison.revenueVsLastWeek,
+                percent: comparison.revenueVsLastWeekPercent,
+              ),
+
+              const SizedBox(height: 18),
+
+              _comparisonRow(
+                title: 'Last Year',
+                revenue: comparison.lastYearRevenue,
+                variance: comparison.revenueVsLastYear,
+                percent: comparison.revenueVsLastYearPercent,
+              ),
+
+              const Spacer(),
+
               Row(
                 children: [
-                  stat(
-                    'Wet %',
-                    '${metrics.wetPercent.toStringAsFixed(1)}%',
+                  Expanded(
+                    child: _kpi(
+                      'Labour',
+                      comparison.today?.labourPercentage ?? 0,
+                    ),
                   ),
-                  stat(
-                    'Food %',
-                    '${metrics.foodPercent.toStringAsFixed(1)}%',
+                  Expanded(
+                    child: _kpi(
+                      'Wet',
+                      comparison.today?.wetPercentage ?? 0,
+                    ),
                   ),
-                  stat(
-                    'Days',
-                    '$days',
+                  Expanded(
+                    child: _kpi(
+                      'Food',
+                      comparison.today?.foodPercentage ?? 0,
+                    ),
+                  ),
+                  Expanded(
+                    child: _kpi(
+                      'Other',
+                      comparison.today?.otherPercentage ?? 0,
+                    ),
                   ),
                 ],
               ),
@@ -116,6 +110,99 @@ class WeeklySummaryCard extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _valueRow(
+    String title,
+    double value,
+    Color colour,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Text(
+          '£${value.toStringAsFixed(0)}',
+          style: TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            color: colour,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _comparisonRow({
+    required String title,
+    required double revenue,
+    required double variance,
+    required double percent,
+  }) {
+    final positive = variance >= 0;
+
+    return Row(
+      children: [
+        Expanded(
+          flex: 3,
+          child: Text(
+            title,
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 2,
+          child: Text(
+            '£${revenue.toStringAsFixed(0)}',
+            textAlign: TextAlign.right,
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            '${positive ? "▲" : "▼"} £${variance.abs().toStringAsFixed(0)} (${percent.abs().toStringAsFixed(1)}%)',
+            textAlign: TextAlign.right,
+            style: TextStyle(
+              color: positive ? Colors.green : Colors.red,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _kpi(
+    String title,
+    double value,
+  ) {
+    return Column(
+      children: [
+        Text(
+          '${value.toStringAsFixed(1)}%',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          title,
+          style: const TextStyle(
+            color: Colors.black54,
+          ),
+        ),
+      ],
     );
   }
 }
